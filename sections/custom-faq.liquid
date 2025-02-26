@@ -1,0 +1,138 @@
+<style>
+   .expandable-div {
+    padding: 10px;
+    border: 1px solid #e1e1e1;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    border-radius: 10px;
+    margin: 0 auto;
+  }
+
+  .expanded {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: ellipsis;
+    max-height: 1000px; /* Adjust the maximum height as needed */
+    transition: max-height 0.5s ease-in-out; /* Smooth transition */
+  }
+
+  .paragraphContent p,
+  .paragraphContent div {
+    text-overflow: ellipsis;
+    overflow: hidden;
+     margin-bottom: 0px;
+  }
+
+  .paragraphContent li {
+    text-overflow: ellipsis;
+    list-style: disc;
+  }
+
+  .faq-que {
+    margin: 0;
+  }
+
+  .custom-faq-li {
+    list-style: none;
+    margin: 15px 0px;
+  }
+
+  .custom-faq > h1 {
+    text-align: center;
+    margin: 40px 0px 40px 0px;
+  }
+
+  h3.faq-que {
+    margin: 10px 0px;
+  }
+
+  .paragraphContent {
+    max-height: 0;
+    text-overflow: ellipsis;
+    /* transition: max-height 0.5s ease-in-out; */
+    /* Smooth transition */
+  }
+
+  .paragraphContent.expanded {
+    max-height: 1000px; /* Adjust the maximum height as needed */
+  }
+
+  .paragraphContent.collapsed {
+    max-height: 20px;
+  }
+  
+
+  @media only screen and (max-width: 600px) {
+    h3.faq-que {
+      font-size: 15px !important;
+    }
+
+    .custom-faq > h1 {
+      margin: 30px 0px 20px 0px;
+    }
+  }
+</style>
+   
+
+
+
+<div class="custom-faq page-width">
+  <h1>WARRANTY</h1>
+    {% for block in section.blocks %}
+  <li class="custom-faq-li">
+    <div class="expandable-div" onclick="toggleContent(this)">
+      <h3 class="faq-que">{{ block.settings.question }}</h3>
+      <div class="paragraphContent collapsed"> 
+        <div>{{ block.settings.answer }} </div>
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</div>
+
+<script>
+  function toggleContent(clickedElement) {
+    var paragraph = clickedElement.querySelector('.paragraphContent');
+    paragraph.classList.toggle('expanded');
+    paragraph.classList.toggle('collapsed');
+  }
+</script> 
+
+
+{% schema %}
+  {
+    "name": "Custom-faq",
+    "settings": [],
+    "blocks":[
+      {
+        "type":"FAQ",
+        "name":"FAQ",
+        "settings":[
+          {
+            "type":"text",
+            "id":"question",
+            "label":"Add question",
+            "default":"Add question"
+          },{
+            "type":"richtext",
+            "id":"answer",
+            "label":"Add Answer"
+          }
+        ]
+      }
+    ],
+    "presets" : [
+      {
+        "name":"Custom-faq"
+      }
+    ]
+  }
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}

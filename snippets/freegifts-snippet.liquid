@@ -1,0 +1,12 @@
+<style>
+  @media (max-width:600px){
+    .glider.sca-list-gift-thumbnail {
+      justify-content: center;
+  }
+}
+</style>
+<script>
+  document.addEventListener("fg-gifts:updated", async () => {
+    document.dispatchEvent(new CustomEvent('ajaxProduct:added'));
+})
+</script>

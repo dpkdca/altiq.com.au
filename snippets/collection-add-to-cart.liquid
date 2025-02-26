@@ -1,0 +1,53 @@
+<div class="collection-cart card-information">
+  {% assign current_variant = product.selected_or_first_available_variant %}
+  <div id="buttonGroup--{{ product.id }}" class="{% if current_variant.available %} without-qty {% endif %}">
+    {% for variant in product.variants %}
+      {% if forloop.first %}
+        <button type="button" data-add-to-cart="" class="variant-button btn btn--full add-to-cart btn--secondary" data-variant-id="{{ variant.id }}" {% unless current_variant.available %} disabled {% endunless %} data-inventory="{{ variant.inventory_quantity }}">
+          {% if current_variant.available %} Add {% else %} {{ 'products.product.sold_out' | t }} {% endif %}
+        </button>
+      {% endif %}
+    {% endfor %}
+  {% if current_variant.available %}  <input type="number" id="quantitySelect--{{ product.id }}" value="1" min="1" class="quantity-input"> {% endif %}
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script>
+   $('#buttonGroup--{{ product.id }}').on('click', '.variant-button', function() {
+      // Remove background color from all buttons
+      $('.variant-button').css('background-color', '');
+      // Get the selected variant id from the button's data attribute
+      let selectedVariantId = $(this).data('variant-id');
+      // Get the inventory quantity from the button's data attribute
+      let selectedVariantInventory = $(this).data('inventory');
+      // Highlight the selected button by changing its background color
+      //$(this).css('background-color', 'lightblue');
+      
+      // Get the quantity from the input field
+      let quantity = $('#quantitySelect--{{ product.id }}').val();
+
+      let formobj = {
+        quantity: quantity,
+        id: selectedVariantId
+      };
+
+      $.ajax({
+        type: 'POST',
+        url: '/cart/add.js',
+        data: formobj,
+        dataType: 'json',
+        success: function(response) {
+          // Handle success
+          var cart = new theme.CartDrawer;
+          cart.init();
+          cart.open();
+        },
+        error: function(error) {
+          // Handle error
+          console.error('Error adding item to cart:', error);
+        }
+      });
+  });
+</script>

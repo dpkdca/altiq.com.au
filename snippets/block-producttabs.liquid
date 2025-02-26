@@ -1,0 +1,151 @@
+{%- unless title_block -%}
+  {%- assign title_block = '' -%}
+{%- endunless -%}
+{%- unless proLazyLoad -%}
+  {%- assign proLazyLoad = false -%}
+{%- endunless -%}
+<div id="productTabs{{ block-producttabs }}" class="products_block exclusive block clearfix">
+  <div class="box-line">
+    <div class="producttabs_left-collumn">
+      <ul class="productTabsNav nav nav-tabs" role="tablist">
+        {%- for block in section.blocks -%}
+          <li
+            {% if forloop.first %}
+            class="active"
+            {% endif %}>
+            <a
+              href="#{{ section.id }}{{ forloop.index }}"
+              role="tab"
+              data-toggle="tab">{{ block.settings.tab_name }}</a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+    <div class="producttabs_right-collumn">
+      <div class="block_content">
+        <div class="product_tab_content tab-content">
+
+          {%- for block in section.blocks -%}
+            {%- assign collection_produclists = block.settings.collection -%}
+            {%- if collection_produclists == blank -%}
+              {%- assign collection_produclists = "all" -%}{%- endif -%}
+            {%- assign collection = collections[collection_produclists] -%}
+            <div class="tab-pane {% if forloop.first %} active{% endif %}" id="{{ section.id }}{{ forloop.index }}">
+              {%- if type_block == 'grid' -%}
+                {% include 'product-grid-layout', loopindex: forloop.index -%}
+              {%- else -%}
+                {%- include 'product_carousel_slick_tab' -%}
+              {%- endif -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{{ 'slick.min.js' | asset_url }}" defer="defer"></script>
+{{ 'slick.css' | asset_url | stylesheet_tag }}
+<script>
+  $(document).ready(function() {    
+    $('.productTabsNav.nav-tabs li').on('click',function(e){
+      e.preventDefault();
+      $('.productTabsNav.nav-tabs .active').removeClass('active');
+      $(this).addClass('active');
+      var id = $(this).find('a').attr('href')
+      $('.product_tab_content .tab-pane').each(function(e){
+        var tab_id = '#'+$(this).attr('id');    
+        console.log(tab_id,id)
+        if(tab_id == id){
+          $(this).addClass('active');
+          $(this).show();
+          $(this).find('.home_pro_tab_slider').slick('unslick')
+          $(this).find('.home_pro_tab_slider').slick({
+            dots: $('.ctm_slide_control').data('dots'),
+            infinite: true,
+            arrows: $('.ctm_slide_control').data('arrow'),
+            speed: 300,
+            slidesToShow: $('.ctm_slide_control').data('slide-show'),
+            slidesToScroll: $('.ctm_slide_control').data('slide-scroll'),
+            rows: $('.ctm_slide_control').data('rows'),
+            autoplay: true,
+            autoplaySpeed: $('.ctm_slide_control').data('slide-speed'),
+            responsive: [
+              {
+                breakpoint: 1199,
+                settings: {
+                  slidesToShow: $('.ctm_slide_control').data('slide-leptop-scroll'),
+                  slidesToScroll: 1,
+                  arrows: false,
+                  dots: true
+                }
+              },
+              {
+                breakpoint: 991,
+                settings: {
+                  slidesToShow: $('.ctm_slide_control').data('slide-tablet-scroll'),
+                  slidesToScroll: 1,
+                  arrows: false,
+                  dots: true
+                }
+              },
+              {
+                breakpoint: 749,
+                settings: {
+                  slidesToShow: $('.ctm_slide_control').data('slide-mobile-scroll'),
+                  slidesToScroll: 1,
+                  arrows: false,
+                  dots: true
+                }
+              }
+            ]
+          });
+        }else{
+          $(this).removeClass('active');
+          $(this).hide();
+        }
+      });
+    });
+    $('.home_pro_tab_slider').slick({
+      dots: $('.ctm_slide_control').data('dots'),
+      infinite: true,
+      arrows: $('.ctm_slide_control').data('arrow'),
+      speed: 300,
+      slidesToShow: $('.ctm_slide_control').data('slide-show'),
+      slidesToScroll: $('.ctm_slide_control').data('slide-scroll'),
+      rows: $('.ctm_slide_control').data('rows'),
+      autoplay: true,
+      autoplaySpeed: $('.ctm_slide_control').data('slide-speed'),
+      responsive: [
+        
+        {
+          breakpoint: 1199,
+          settings: {
+            slidesToShow: $('.ctm_slide_control').data('slide-leptop-scroll'),
+            slidesToScroll: 1,
+            arrows: false,
+            dots: true
+          }
+        },
+        {
+          breakpoint: 991,
+          settings: {
+            slidesToShow: $('.ctm_slide_control').data('slide-tablet-scroll'),
+            slidesToScroll: 1,
+            arrows: false,
+            dots: true
+          }
+        },
+        {
+          breakpoint: 749,
+          settings: {
+            slidesToShow: $('.ctm_slide_control').data('slide-mobile-scroll'),
+            slidesToScroll: 1,
+            arrows: false,
+            dots: true
+          }
+        }
+      ]
+    });  
+  });
+</script>
+{% assign proLazyLoad = false %}

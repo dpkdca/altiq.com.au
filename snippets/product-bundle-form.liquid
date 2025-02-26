@@ -1,0 +1,169 @@
+{%- form 'product', product, id: form_id, class: 'product-single__form' -%}
+
+  {%- liquid
+    assign gift_card_recipient_feature_active = false
+    if block.settings.show_gift_card_recipient and product.gift_card?
+      assign gift_card_recipient_feature_active = true
+    endif
+
+    assign enable_dynamic_buttons = false
+    if show_dynamic_checkout and template != 'product.preorder' and gift_card_recipient_feature_active == false
+      assign enable_dynamic_buttons = true
+    endif
+  -%}
+
+  {%- if gift_card_recipient_feature_active -%}
+    {%- render 'gift-card-recipient-form', product: product, form: form, section: section -%}
+  {%- endif -%}
+
+  {%- if enable_dynamic_buttons -%}
+    <div class="payment-buttons">
+  {%- endif -%}
+
+    {%- liquid
+      assign default_text = 'products.product.add_to_cart' | t
+      assign button_text = 'products.product.add_to_cart' | t
+      assign despatch_date = "ships in 24 hours" 
+      if template contains 'preorder' or template contains 'long2'
+        assign default_text = 'products.product.preorder' | t
+        assign button_text = 'products.product.preorder' | t
+       
+      if current_variant.inventory_quantity <= 0 and product.selected_or_first_available_variant.inventory_policy contains 'continue' 
+         assign default_text = 'products.product.preorder' | t
+         assign button_text = 'products.product.preorder' | t
+         assign despatch_date = "shipping on (custom text)"
+       else
+        assign default_text = 'products.product.add_to_cart' | t
+        assign button_text = 'products.product.add_to_cart' | t
+        assign despatch_date = "ships in 24 hours" 
+       endif 
+       
+       endif
+      unless current_variant.available
+        assign button_text = 'products.product.sold_out' | t
+      endunless
+    -%}
+
+<!-- Modified Add to Cart Button -->
+<button
+  {% if product.empty? %}type="button"{% else %}type="button"{% endif %}
+  name="add"
+  data-add-to-cart
+  class="{% if current_variant.inventory_quantity <= 0 and product.selected_or_first_available_variant.inventory_policy contains 'continue' %} preorder {% else %} pre_add_to_cart{% endif %} btn btn--full add-to-cart{% if enable_dynamic_buttons and product.selling_plan_groups == empty %} btn--secondary{% endif %}"
+  {% unless current_variant.available %} disabled="disabled"{% endunless %}
+  onclick="addBundleToCart()">
+  <span data-add-to-cart-text data-default-text="{{ default_text }}">
+    {{ button_text }}
+  </span>
+</button>
+      
+<script>
+  function addBundleToCart() {
+    // Get the selected main product variant ID
+    var mainProductVariantId = {{ current_variant.id }};
+    
+    // Get the main product quantity from the input field
+    var mainProductQuantity = parseInt(document.getElementById('Quantity-{{ qty_id }}').value) || 1;
+
+    // Create an array to store items to add to the cart
+    var itemsToAdd = [
+      {
+        id: mainProductVariantId,
+        quantity: mainProductQuantity
+      }
+    ];
+
+    // Get all the selected bundle variant checkboxes
+    var selectedBundleVariants = document.querySelectorAll('input[name^="selected_variant_"]:checked');
+
+    // Add each selected bundle variant to the items array
+    selectedBundleVariants.forEach(function(checkbox) {
+      var variantId = checkbox.value;
+      var quantityField = document.querySelector('input[data-variant-id="' + variantId + '"]');
+      var quantity = parseInt(quantityField.value) || 1; // Get the quantity, default to 1 if not set
+
+      itemsToAdd.push({
+        id: variantId,
+        quantity: quantity
+      });
+    });
+
+    // Perform an AJAX request to add all items to the cart
+    fetch('/cart/add.js', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ items: itemsToAdd })
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Bundle added to cart:', data);
+      // Optionally, redirect to the cart page or update the cart UI
+      //window.location.href = '/cart';
+      // Handle success
+          var cart = new theme.CartDrawer;
+          cart.init();
+          cart.open();
+    })
+    .catch(error => {
+      console.error('Error adding bundle to cart:', error);
+      alert('Failed to add bundle to cart. Please try again.');
+    });
+  }
+</script>
+
+
+    <!-- <div class="despatch_date">
+      <p>{{ despatch_date }}</p>
+    </div> -->
+      
+    {%- if enable_dynamic_buttons -%}
+      {{ form | payment_button }}
+    {%- endif -%}
+
+  {%- if enable_dynamic_buttons -%}
+    </div>
+  {%- endif -%}
+
+  <div class="shopify-payment-terms product__policies">{{ form | payment_terms }}</div>
+
+  <select name="id" data-product-select class="product-single__variants no-js">
+    {%- for variant in product.variants -%}
+      {%- if variant.available -%}
+        <option {% if variant == product.selected_or_first_available_variant %}
+          selected="selected"{% endif %}
+          value="{{ variant.id }}">
+          {{ variant.title }} - {{ variant.price | money_with_currency }}
+        </option>
+      {%- else -%}
+        <option disabled="disabled">
+          {{ variant.title }} - {{ 'products.product.sold_out' | t }}
+        </option>
+      {%- endif -%}
+    {%- endfor -%}
+  </select>
+{%- endform -%}
+
+{% if template contains 'preorder' or template contains 'seaprate' %}
+
+<!-- Add this script in your product template -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Get all elements with the class 'variant'
+    var variants = document.querySelectorAll('.variant-input');
+
+    // Add a click event listener to each variant element
+    variants.forEach(function(variant) {
+      variant.addEventListener('click', function() {
+        // Reload the page after a delay of 1 second
+        setTimeout(function() {
+          location.reload();
+        }, 500); // 500 milliseconds = 1 second
+      });
+    });
+  });
+ 
+</script>
+{% endif %}

@@ -1,0 +1,36 @@
+<div class="page_header" {% if section.settings.page_bg %}style="background-image:url({{ section.settings.page_bg | img_url:'master' }}); background-size: cover; background-position:center center;"{% endif %}>
+    <div class="page-width">
+      <header class="section-header">
+        {% if template == 'blog' %}
+        <h1 class="section-header__title">{{ blog.title }}</h1>
+        {% else %}
+        <h1 class="section-header__title">{{ page.title }}</h1>
+        {% endif %}
+      </header>
+    </div>
+  </div>
+  
+  {% schema %}
+    {
+      "name": "Page Header",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "page_bg",
+          "label": "page_header_bg"
+        }
+      ],
+    "presets":[
+      {
+      "name":"Page Header"
+       }
+    ]
+    }
+  {% endschema %}
+  
+  {% stylesheet %}
+  {% endstylesheet %}
+  
+  {% javascript %}
+  {% endjavascript %}
+  

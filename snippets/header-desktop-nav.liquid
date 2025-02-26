@@ -1,0 +1,182 @@
+{% unless limit %}
+  {%- assign limit = main_menu.links.size -%}
+{% endunless %}
+{% unless offset %}
+  {%- assign offset = 0 -%}
+{% endunless %}
+
+<ul
+  class="site-nav site-navigation small--hide custom_megamenu"
+  {% unless disable_aria %}
+  role="navigation"
+  aria-label="Primary"
+  {% endunless %}>
+ 
+<!-- <li class="header-item--logo-nav">
+ <div class="header-item header-item--logo">
+                {%- render 'header-logo-block', section: section -%}
+              </div>
+</li> -->
+  {% for link in main_menu.links limit: limit offset: offset %}
+
+    {% assign title_menu = link.title | handleize %}
+    {%- assign has_dropdown = false -%}
+    {%- assign is_megamenu = false -%}
+    {% for block in section.blocks %}
+      {% if block.type == 'megamenu' and block.settings.menu_name == link.title %}
+        {%- assign has_dropdown = true -%}
+        {%- assign is_megamenu = true -%}
+      {% endif %}
+      {% if block.type == 'custom_megamenu' and block.settings.menu_name == link.title %}
+        {%- assign has_dropdown = true -%}
+        {%- assign is_megamenu = true -%}
+      {% endif %}
+    {% endfor %}
+
+    
+    <li class="site-nav__item site-nav__expanded-item{% if has_dropdown %} site-nav--has-dropdown{% endif %}{% if is_megamenu %} site-nav--is-megamenu{% endif %} site-nav__item_{{ forloop.index }}" {% if has_dropdown %}aria-haspopup="true"{% endif %}>
+
+      <a href="{{ link.url }}" class="site-nav__link site-nav__link--underline{% if has_dropdown %} site-nav__link--has-dropdown{% endif %}">
+        {% if link.title contains 'CAR LEDs' %}
+          <span class="menu1_icon"></span>
+        {% endif %}
+        {% if link.title contains 'OFF-ROAD LIGHTING' %}
+          <span class="menu2_icon"></span>
+        {% endif %}
+        {% if link.title contains 'MARINE' %}
+          <span class="menu3_icon"></span>
+        {% endif %}
+        {{ link.title }}
+      </a>
+      {% for block in section.blocks %}
+        {% if block.type == 'megamenu' and block.settings.menu_name == link.title %}
+          {%- assign megamenu_url = linklists[block.settings.megamenu_url] -%}
+          <div class="site-nav__dropdown megamenu text-left">
+            <ul class="grid__item medium-up--one-fifth mega-grid-left appear-animation appear-delay-1">
+              {% for mega_childlink in megamenu_url.links %}
+                {% if forloop.index == 1 %}
+                  {%- assign firstchild = mega_childlink.url | handle -%}
+                {% endif %}
+
+                {% assign mega_mini_img = block.settings.mini_img %}
+                {% assign mega_main_img = block.settings.main_img %}
+                {%- liquid
+                  case mega_childlink.title
+                  when block.settings.megamenu_title_1
+                    assign mega_mini_img = block.settings.mini_img_1
+                    assign mega_main_img = block.settings.main_img_1
+                  when block.settings.megamenu_title_2
+                    assign mega_mini_img = block.settings.mini_img_2
+                    assign mega_main_img = block.settings.main_img_2
+
+                    when block.settings.megamenu_title_3
+                    assign mega_mini_img = block.settings.mini_img_3
+                    assign mega_main_img = block.settings.main_img_3
+
+                    when block.settings.megamenu_title_4
+                    assign mega_mini_img = block.settings.mini_img_4
+                    assign mega_main_img = block.settings.main_img_4
+
+                    when block.settings.megamenu_title_5
+                    assign mega_mini_img = block.settings.mini_img_5
+                    assign mega_main_img = block.settings.main_img_5
+
+                    when block.settings.megamenu_title_6
+                    assign mega_mini_img = block.settings.mini_img_6
+                    assign mega_main_img = block.settings.main_img_6
+
+                    when block.settings.megamenu_title_7
+                    assign mega_mini_img = block.settings.mini_img_7
+                    assign mega_main_img = block.settings.main_img_7
+
+                  endcase
+                -%}
+                <li
+                  class="megamenu_link {% if forloop.index == 1 %}{% endif %}"
+                  id="{{ mega_childlink.url | handle }}"
+                  style="background-image:url('{{mega_mini_img | img_url: 'x60'}}')">
+                  <a href="{{ mega_childlink.url }}" class="site-nav__dropdown-link site-nav__dropdown-link--top-level">
+                    {{ mega_childlink.title }}
+                  </a>
+                  <ul class="child_megamenu_container">
+                    {% if mega_childlink.levels > 0 %}
+                      {% for mega_grandchildlink in mega_childlink.links %}
+                        <li class="child_megamenu_link">
+                          <a href="{{ mega_grandchildlink.url }}" class="site-nav__dropdown-link">
+                            {{ mega_grandchildlink.title }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                    {% endif %}
+                    {% if mega_main_img != '' %}
+                      <li class="child_megamenu_link banner-menu">
+                        <img src="{{mega_main_img | img_url: '500x'}}">
+                      </li>
+                    {% endif %}
+                  </ul>
+
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        {% if block.type == 'custom_megamenu' and block.settings.menu_name == link.title %}
+          <div class="support_megamenu site-nav__dropdown megamenu text-left">
+            <ul class="support-menu__list">
+              <li class="support-menu__item support-menu-block">
+                <div class="support_information">
+                  <h3>HEAD OFFICE & SHOWROOM</h3>
+                  {% if block.settings.address %}
+                    <div class="open_time">
+                      {{ block.settings.address }}
+                    </div>
+                  {% endif %}                  
+                  <p>
+                    <a style="color: #ed1c24 !important;" href="mailto: {{block.settings.email}}">Email us</a><br>
+                    {% comment %} <span>{{ block.settings.email }}</span> {% endcomment %}
+                  </p>
+                  {% if block.settings.phone %}
+                    <p>{{block.settings.phone}}</p>
+                  {% endif %}
+                  {% if block.settings.open_time %}
+                    <div class="open_time">
+                    {{ block.settings.open_time }}
+                    </div>
+                  {% endif %}                  
+                </div>
+              </li>
+              <li class="support-menu__item support-menu__item--parent" data-id="{{block.settings.bottom_menu_url}}">
+                <div class="support_urls">
+                  <h3>HELP:</h3>
+                  {% if block.settings.bottom_menu_url != blank %}
+                    {%- assign buttom_url = linklists[block.settings.bottom_menu_url] -%}
+                    {% for buttom_childlink in buttom_url.links %}
+                      <a href="{{ buttom_childlink.url }}" class="site-nav__dropdown-link site-nav__dropdown-link--top-level">
+                        {{ buttom_childlink.title }}
+                      </a>
+                    {% endfor %}
+                  {% endif %}
+                </div>
+              </li>
+            </ul>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </li>
+  {% endfor %}
+</ul>
+<script>
+  const mega_links = document.querySelectorAll("megamenu_link");
+  $(document).ready(function() {
+    $('.custom_megamenu.site-nav .megamenu_link').hover(function() {
+      $(this).siblings().removeClass('active');
+      $(this).addClass('active');
+    })
+    $('.custom_megamenu .site-nav__item').hover(function() {
+      if ($(this).find('.site-nav__dropdown > ul.grid__item .megamenu_link')) {
+        $(this).find('.site-nav__dropdown > ul.grid__item .megamenu_link').removeClass('active');
+        $(this).find('.site-nav__dropdown > ul.grid__item .megamenu_link:first-child').addClass('active');
+      }
+    })
+  })
+</script>
